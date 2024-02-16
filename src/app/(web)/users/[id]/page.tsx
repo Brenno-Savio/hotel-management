@@ -1,16 +1,20 @@
 'use client';
 
-import { signOut } from 'next-auth/react';
-import useSWR from 'swr';
-
-import { getUserBookings } from '@/libs/apis';
-import { User } from '@/models/user';
 import axios from 'axios';
+import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { BsJournalBookmarkFill } from 'react-icons/bs';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { GiMoneyStack } from 'react-icons/gi';
+import useSWR from 'swr';
+
+import BackDrop from '@/components/BackDrop/BackDrop';
+import Chart from '@/components/Chart/Chart';
+import RatingModal from '@/components/RatingModal/RatingModal';
+import Table from '@/components/Table/Table';
+import { getUserBookings } from '@/libs/apis';
+import { User } from '@/models/user';
 import LoadingSpinner from '../../loading';
 
 const UserDetails = (props: { params: { id: string } }) => {
@@ -21,6 +25,16 @@ const UserDetails = (props: { params: { id: string } }) => {
   const [currentNav, setCurrentNav] = useState<
     'bookings' | 'amount' | 'ratings'
   >('bookings');
+
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [isRatingVisible, setIsRatingVisible] = useState(false);
+  const [ratingValue, setRatingValue] = useState(0);
+  const [ratingText, setRatingText] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  const toggleRatingModal = () => setIsRatingVisible((prevState) => !prevState);
+
+  const reviewSubmitHandler = async () => {};
 
   const fetchUserBooking = async () => getUserBookings(userId);
   const fetchUserData = async () => {
@@ -134,9 +148,37 @@ const UserDetails = (props: { params: { id: string } }) => {
             </ol>
           </nav>
 
-          {currentNav === 'bookings' ? userBookings && <>Table</> : <></>}
+          {currentNav === 'bookings' ? (
+            userBookings && (
+              <Table
+                bookingDetails={userBookings}
+                setRoomId={setRoomId}
+                toggleRatingModal={toggleRatingModal}
+              />
+            )
+          ) : (
+            <></>
+          )}
+
+          {currentNav === 'amount' ? (
+            userBookings && <Chart userBookings={userBookings} />
+          ) : (
+            <></>
+          )}
         </div>
       </div>
+
+      <RatingModal
+        isOpen={isRatingVisible}
+        ratingValue={ratingValue}
+        setRatingValue={setRatingValue}
+        ratingText={ratingText}
+        setRatingText={setRatingText}
+        reviewSubmitHandler={reviewSubmitHandler}
+        isSubmittingReview={isSubmittingReview}
+        toggleRatingModal={toggleRatingModal}
+      />
+      <BackDrop isOpen={isRatingVisible} />
     </div>
   );
 };
