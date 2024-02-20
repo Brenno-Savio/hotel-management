@@ -3,14 +3,14 @@ import { BsStarFill } from 'react-icons/bs';
 
 type Props = {
   isOpen: boolean;
-  ratingValue: number;
-  setRatingValue: Dispatch<SetStateAction<number>>;
+  ratingValue: number | null;
+  setRatingValue: Dispatch<SetStateAction<number | null>>;
   ratingText: string;
   setRatingText: Dispatch<SetStateAction<string>>;
-  reviewSubmitHandler: () => Promise<void>;
+  reviewSubmitHandler: () => Promise<string | undefined>;
   isSubmittingReview: boolean;
   toggleRatingModal: () => void;
-//   setIsSubmittingReview: ;
+  //   setIsSubmittingReview: ;
 };
 
 const RatingModal: FC<Props> = (props) => {
@@ -35,8 +35,8 @@ const RatingModal: FC<Props> = (props) => {
           : 'opacity-0 pointer-events-none'
       }`}
     >
-      <div className="bg-white w-96 p-4 rounded-lg shadow-lg">
-        <h2 className="text-xl dark:text-gray-800 text-center font-semibold mb-2">
+      <div className="bg-white text-gray-800 w-96 p-4 rounded-lg shadow-lg dark:bg-[#21242A] dark:text-[#eff0f2]">
+        <h2 className="text-xl text-center font-semibold mb-2">
           Rate Your Experience
         </h2>
         <div className="mb-4">
@@ -44,11 +44,14 @@ const RatingModal: FC<Props> = (props) => {
             {starValues.map((value) => (
               <button
                 className={`w-6 h-6 ${
-                  ratingValue === value
+                  ratingValue !== null && ratingValue >= value
                     ? 'text-tertiary-light'
                     : 'text-gray-300'
                 }`}
-                onClick={() => setRatingValue(value)}
+                onClick={() => {
+                  setRatingValue(value);
+                  console.log(ratingValue);
+                }}
                 key={value}
               >
                 <BsStarFill />
@@ -58,7 +61,7 @@ const RatingModal: FC<Props> = (props) => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-[#eff0f2]">
             Review Text
           </label>
 
@@ -66,7 +69,7 @@ const RatingModal: FC<Props> = (props) => {
             value={ratingText}
             onChange={(e) => setRatingText(e.target.value)}
             rows={4}
-            className="w-full px-2 py-3 border rounded-md"
+            className="w-full px-2 py-3 border rounded-md text-gray-800 bg-white dark:bg-[#21242A] dark:text-[#eff0f2]"
           ></textarea>
         </div>
 
@@ -78,7 +81,10 @@ const RatingModal: FC<Props> = (props) => {
           >
             {isSubmittingReview ? 'Submitting' : 'Submit'}
           </button>
-          <button onClick={toggleRatingModal} className='ml-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400'>
+          <button
+            onClick={toggleRatingModal}
+            className="ml-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+          >
             Cancel
           </button>
         </div>

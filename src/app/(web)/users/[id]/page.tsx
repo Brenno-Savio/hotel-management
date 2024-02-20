@@ -15,6 +15,7 @@ import RatingModal from '@/components/RatingModal/RatingModal';
 import Table from '@/components/Table/Table';
 import { getUserBookings } from '@/libs/apis';
 import { User } from '@/models/user';
+import toast from 'react-hot-toast';
 import LoadingSpinner from '../../loading';
 
 const UserDetails = (props: { params: { id: string } }) => {
@@ -28,13 +29,40 @@ const UserDetails = (props: { params: { id: string } }) => {
 
   const [roomId, setRoomId] = useState<string | null>(null);
   const [isRatingVisible, setIsRatingVisible] = useState(false);
-  const [ratingValue, setRatingValue] = useState(0);
+  const [ratingValue, setRatingValue] = useState<number | null>(0);
   const [ratingText, setRatingText] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   const toggleRatingModal = () => setIsRatingVisible((prevState) => !prevState);
 
-  const reviewSubmitHandler = async () => {};
+  const reviewSubmitHandler = async () => {
+    if (!ratingText.trim().length || !ratingValue) {
+      return toast.error('Please provide a rating text and a rating');
+    }
+
+    if (!roomId) toast.error('Id not provided');
+
+    try {
+      const { data } = await axios.post('/api/users', {
+        reviewText: ratingText,
+        ratingValue,
+        roomId,
+      });
+      console.log(data);
+      toast.success('Review Submitted')
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        'Review Failed, please contact the suport or try again later',
+      );
+    } finally {
+      setRatingText('');
+      setRatingValue(null);
+      setRoomId(null)
+      setIsSubmittingReview(false);
+      setIsRatingVisible(false);
+    }
+  };
 
   const fetchUserBooking = async () => getUserBookings(userId);
   const fetchUserData = async () => {
@@ -67,7 +95,7 @@ const UserDetails = (props: { params: { id: string } }) => {
     <div className="container mx-auto px-2 md:px-4 py-10">
       <div className="grid md:grid-cols-12 gap-10">
         <div className="hidden md:block md:col-span-4 lg:col-span-3 shadow-lg h-fit sticky top-10 bg-[#eff0f2] text-black dark:bg-[#21242A] dark:text-[#eff0f2] rounded-lg px-6 py-4">
-          <div className="md:w-[143px] w-38 h-28 md:h-[143px] mx-auto rounded-full overflow-hidden">
+          <div className="md:w-[143px] w-28 h-28 md:h-[143px] mx-auto rounded-full overflow-hidden">
             <Image
               src={userData.image}
               alt={userData.name}
